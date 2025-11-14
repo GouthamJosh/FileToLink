@@ -25,29 +25,33 @@ async def root_route_handler(request):
 # -------------------------------------------------
 
 def extract_id_hash(path, query_hash):
-    # Clean encoded parts
+    # Decode safely
     try:
-        path = path.encode('latin1', 'replace').decode('utf-8', 'ignore')
+        path = path.encode("latin1", "replace").decode("utf-8", "ignore")
     except:
         pass
 
-    clean = path.split("/")[0]  # always take before first slash
+    segment = path.split("/")[0]
 
-    # Case 1: /AgADzh224 (with or without filename)
-    direct = re.match(r"([A-Za-z0-9_-]{6})(d+)", clean)
-    if direct:
-        return int(direct.group(2)), direct.group(1)
+    # CASE 1: /AgADnR243  (secureHash 6 chars + ID)
+    m = re.match(r"^([A-Za-z0-9_-]{6})(\d+)$", segment)
+    if m:
+        return int(m.group(2)), m.group(1)
 
-    # Case 2: /224/filename + hash in query
-    if clean.isdigit():
-        return int(clean), query_hash
+    # CASE 2: /243/filename  (ID + hash query)
+    if segment.isdigit():
+        if not query_hash:
+            raise InvalidHash("Missing ?hash=")
+        return int(segment), query_hash
 
-    # Fallback: detect first number as ID
-    digits = re.findall(r"d+", clean)
+    # CASE 3: fallback → first number is ID
+    digits = re.findall(r"\d+", segment)
     if digits:
+        if not query_hash:
+            raise InvalidHash("Missing ?hash=")
         return int(digits[0]), query_hash
 
-    raise FIleNotFound("Invalid Path Format")
+    raise FIleNotFound("Invalid URL Format")
 
 # -------------------------------------------------
 # WATCH ROUTE
@@ -156,3 +160,4 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Accept-Ranges": "bytes",
         },
     )
+
