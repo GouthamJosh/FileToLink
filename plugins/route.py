@@ -1,6 +1,4 @@
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
+# Fixed & Cleaned Full Server Code for Koyeb File2Link
 
 import re, math, logging, secrets, mimetypes, time
 from info import *
@@ -17,80 +15,112 @@ routes = web.RouteTableDef()
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return web.json_response("BenFilterBot")
+    return web.json_response("File 2 Link 💥")
+
+# ----------------------------------------------
+# FIXED URL PARSER
+# Accepts:
+#   /watch/<secureHash><id>
+#   /<secureHash><id>
+#   /<id>/<filename>?hash=<secureHash>
+# ----------------------------------------------
+
+def extract_id_hash(path, query_hash):
+    # Case 1: /AgADgB181
+    direct = re.fullmatch(r"([A-Za-z0-9_-]{6})(\d+)", path)
+    if direct:
+        return int(direct.group(2)), direct.group(1)
+
+    # Case 2: /181/filename
+    if "/" in path:
+        first = path.split("/")[0]
+        if first.isdigit():
+            return int(first), query_hash
+
+    # Case 3: /181
+    if path.isdigit():
+        return int(path), query_hash
+
+    raise FIleNotFound("Invalid Path Format")
+
+# ----------------------------------------------
+# WATCH ROUTE - returns HTML page
+# ----------------------------------------------
 
 @routes.get(r"/watch/{path:\S+}", allow_head=True)
-async def stream_handler(request: web.Request):
+async def watch_handler(request: web.Request):
     try:
         path = request.match_info["path"]
-        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
-        if match:
-            secure_hash = match.group(1)
-            id = int(match.group(2))
-        else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
-            secure_hash = request.rel_url.query.get("hash")
-        return web.Response(text=await render_page(id, secure_hash), content_type='text/html')
+        qh = request.rel_url.query.get("hash")
+
+        file_id, secure_hash = extract_id_hash(path, qh)
+
+        return web.Response(
+            text=await render_page(file_id, secure_hash),
+            content_type='text/html'
+        )
+
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
     except Exception as e:
-        logging.critical(e.with_traceback(None))
+        logging.critical(str(e))
         raise web.HTTPInternalServerError(text=str(e))
+
+# ----------------------------------------------
+# STREAM ROUTE
+# ----------------------------------------------
 
 @routes.get(r"/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
         path = request.match_info["path"]
-        match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)$", path)
-        if match:
-            secure_hash = match.group(1)
-            id = int(match.group(2))
-        else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
-            secure_hash = request.rel_url.query.get("hash")
-        return await media_streamer(request, id, secure_hash)
+        qh = request.rel_url.query.get("hash")
+
+        file_id, secure_hash = extract_id_hash(path, qh)
+
+        return await media_streamer(request, file_id, secure_hash)
+
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
         raise web.HTTPNotFound(text=e.message)
-    except (AttributeError, BadStatusLine, ConnectionResetError):
-        pass
     except Exception as e:
-        logging.critical(e.with_traceback(None))
+        logging.critical(str(e))
         raise web.HTTPInternalServerError(text=str(e))
 
 class_cache = {}
 
+# ----------------------------------------------
+# MEDIA STREAMER
+# ----------------------------------------------
+
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
     range_header = request.headers.get("Range", 0)
-    
+
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
-    
-    if MULTI_CLIENT:
-        logging.info(f"Client {index} is now serving {request.remote}")
 
+    if MULTI_CLIENT:
+        logging.info(f"Client {index} serving {request.remote}")
+
+    # ByteStreamer Caching
     if faster_client in class_cache:
         tg_connect = class_cache[faster_client]
-        logging.debug(f"Using cached ByteStreamer object for client {index}")
     else:
-        logging.debug(f"Creating new ByteStreamer object for client {index}")
         tg_connect = ByteStreamer(faster_client)
         class_cache[faster_client] = tg_connect
-    logging.debug("before calling get_file_properties")
+
     file_id = await tg_connect.get_file_properties(id)
-    logging.debug("after calling get_file_properties")
-    
+
+    # HASH CHECK FIX
     if file_id.unique_id[:6] != secure_hash:
-        logging.debug(f"Invalid hash for message with ID {id}")
         raise InvalidHash
-    
+
     file_size = file_id.file_size
 
+    # ------------ RANGE HANDLING ------------
     if range_header:
         from_bytes, until_bytes = range_header.replace("bytes=", "").split("-")
         from_bytes = int(from_bytes)
@@ -99,11 +129,11 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
         from_bytes = request.http_range.start or 0
         until_bytes = (request.http_range.stop or file_size) - 1
 
-    if (until_bytes > file_size) or (from_bytes < 0) or (until_bytes < from_bytes):
+    if from_bytes < 0 or until_bytes < from_bytes or until_bytes > file_size:
         return web.Response(
             status=416,
             body="416: Range not satisfiable",
-            headers={"Content-Range": f"bytes */{file_size}"},
+            headers={"Content-Range": f"bytes */{file_size}"}
         )
 
     chunk_size = 1024 * 1024
@@ -115,35 +145,25 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
 
     req_length = until_bytes - from_bytes + 1
     part_count = math.ceil(until_bytes / chunk_size) - math.floor(offset / chunk_size)
+
     body = tg_connect.yield_file(
         file_id, index, offset, first_part_cut, last_part_cut, part_count, chunk_size
     )
 
-    mime_type = file_id.mime_type
-    file_name = file_id.file_name
-    disposition = "attachment"
-
-    if mime_type:
-        if not file_name:
-            try:
-                file_name = f"{secrets.token_hex(2)}.{mime_type.split('/')[1]}"
-            except (IndexError, AttributeError):
-                file_name = f"{secrets.token_hex(2)}.unknown"
-    else:
-        if file_name:
-            mime_type = mimetypes.guess_type(file_id.file_name)
-        else:
-            mime_type = "application/octet-stream"
-            file_name = f"{secrets.token_hex(2)}.unknown"
+    # MIME FIX
+    mime_type = file_id.mime_type or "application/octet-stream"
+    file_name = file_id.file_name or f"{secrets.token_hex(4)}.bin"
 
     return web.Response(
         status=206 if range_header else 200,
         body=body,
         headers={
-            "Content-Type": f"{mime_type}",
+            "Content-Type": mime_type,
             "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
             "Content-Length": str(req_length),
-            "Content-Disposition": f'{disposition}; filename="{file_name}"',
+            "Content-Disposition": f'attachment; filename="{file_name}"',
             "Accept-Ranges": "bytes",
         },
     )
+
+# END OF FIXED CODE
