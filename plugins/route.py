@@ -15,7 +15,7 @@ routes = web.RouteTableDef()
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return web.json_response("File 2 Link 💥")
+    return web.json_response("File 2 Link !")
 
 # ----------------------------------------------
 # FIXED URL PARSER
@@ -26,20 +26,28 @@ async def root_route_handler(request):
 # ----------------------------------------------
 
 def extract_id_hash(path, query_hash):
-    # Case 1: /AgADgB181
-    direct = re.fullmatch(r"([A-Za-z0-9_-]{6})(\d+)", path)
+    # Normalize unicode and replace + with spaces
+    try:
+        path = path.encode('latin1', 'replace').decode('utf-8', 'ignore')
+    except:
+        pass
+
+    # Always extract ID from before first '/'
+    clean = path.split("/")[0]
+
+    # Case 1: /AgADxx123
+    direct = re.fullmatch(r"([A-Za-z0-9_-]{6})(\d+)", clean)
     if direct:
         return int(direct.group(2)), direct.group(1)
 
-    # Case 2: /181/filename
-    if "/" in path:
-        first = path.split("/")[0]
-        if first.isdigit():
-            return int(first), query_hash
+    # Case 2: /123/filename (any filename allowed)
+    if clean.isdigit():
+        return int(clean), query_hash
 
-    # Case 3: /181
-    if path.isdigit():
-        return int(path), query_hash
+    # Case 3: fallback for mixed encoded strings
+    digits = re.findall(r"\d+", clean)
+    if digits:
+        return int(digits[0]), query_hash
 
     raise FIleNotFound("Invalid Path Format")
 
