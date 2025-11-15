@@ -33,7 +33,7 @@ async def watch_page_handler(request: web.Request):
             try:
                 id = int(re.search(r"(\d+)", path).group(1))
             except AttributeError:
-                raise FIleNotFound(message="Invalid path format: ID not found.")
+                raise FIleNotFound("Invalid path format: ID not found.")  # Fixed: Removed keyword argument
             secure_hash = request.rel_url.query.get("hash")
 
         return web.Response(
@@ -66,7 +66,7 @@ async def stream_handler(request: web.Request):
             try:
                 id = int(re.search(r"(\d+)", path).group(1))
             except AttributeError:
-                raise FIleNotFound(message="Invalid path format: ID not found.")
+                raise FIleNotFound("Invalid path format: ID not found.")  # Fixed: Removed keyword argument
             secure_hash = request.rel_url.query.get("hash")
 
         return await media_streamer(request, id, secure_hash)
