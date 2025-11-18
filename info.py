@@ -4,10 +4,10 @@ from os import environ
 id_pattern = re.compile(r'^.\d+$')
 
 # Bot information
-SESSION = environ.get('SESSION', 'FileToLink')
-API_ID = int(environ.get('API_ID', '18979569'))
-API_HASH = environ.get('API_HASH', '45db354387b8122bdf6c1b0beef93743')
-BOT_TOKEN = environ.get('BOT_TOKEN', "8361711378:AAGNqQL4YTvECf-3GR9ff_Na04sVGJzgF_U")
+SESSION = environ.get('SESSION', '')
+API_ID = int(environ.get('API_ID', ''))
+API_HASH = environ.get('API_HASH', '')
+BOT_TOKEN = environ.get('BOT_TOKEN', "")
 
 # Bot settings
 PORT = environ.get("PORT", "8080")
@@ -15,7 +15,7 @@ PORT = environ.get("PORT", "8080")
 # Online Stream and Download
 MULTI_CLIENT = False
 SLEEP_THRESHOLD = int(environ.get('SLEEP_THRESHOLD', '60'))
-PING_INTERVAL = int(environ.get("PING_INTERVAL", "1200"))  # 20 minutes
+PING_INTERVAL = int(environ.get("PING_INTERVAL", "300"))  # 20 minutes
 if 'DYNO' in environ:
     ON_HEROKU = True
 else:

@@ -1,5 +1,3 @@
-
-
 import sys, glob, importlib, logging, logging.config, pytz, asyncio
 from pathlib import Path
 
@@ -25,20 +23,20 @@ from datetime import date, datetime
 from aiohttp import web
 from plugins import web_server
 
-from TechVJ.bot import TechVJBot
-from TechVJ.util.keepalive import ping_server
-from TechVJ.bot.clients import initialize_clients
+from lib.bot import File2Link
+from lib.util.keepalive import ping_server
+from lib.bot.clients import initialize_clients
 
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
-TechVJBot.start()
+File2Link.start()
 loop = asyncio.get_event_loop()
 
 
 async def start():
     print('\n')
     print('Initalizing Your Bot')
-    bot_info = await TechVJBot.get_me()
+    bot_info = await File2Link.get_me()
     await initialize_clients()
     for name in files:
         with open(name) as a:
@@ -53,8 +51,8 @@ async def start():
             print("File 2 Link Imported => " + plugin_name)
     if ON_HEROKU:
         asyncio.create_task(ping_server())
-    me = await TechVJBot.get_me()
-    temp.BOT = TechVJBot
+    me = await File2Link.get_me()
+    temp.BOT = File2Link
     temp.ME = me.id
     temp.U_NAME = me.username
     temp.B_NAME = me.first_name
@@ -62,7 +60,7 @@ async def start():
     today = date.today()
     now = datetime.now(tz)
     time = now.strftime("%H:%M:%S %p")
-    await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+    await File2Link.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
     app = web.AppRunner(await web_server())
     await app.setup()
     bind_address = "0.0.0.0"
