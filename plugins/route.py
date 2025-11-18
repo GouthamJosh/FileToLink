@@ -2,7 +2,7 @@ import re, math, logging, secrets, mimetypes, time
 from info import *
 from aiohttp import web
 from aiohttp.http_exceptions import BadStatusLine
-from lib.bot import multi_clients, work_loads, libBot
+from lib.bot import File2Link, multi_clients, work_loads
 from lib.server.exceptions import FIleNotFound, InvalidHash  # Note: Typo in 'FIleNotFound' – should be 'FileNotFound', but left as-is assuming it's defined that way
 from lib import StartTime, __version__
 from lib.util.custom_dl import ByteStreamer
@@ -156,3 +156,4 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Accept-Ranges": "bytes",
         },
     )
+
