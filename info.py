@@ -15,7 +15,7 @@ PORT = environ.get("PORT", "8080")
 # Online Stream and Download
 MULTI_CLIENT = False
 SLEEP_THRESHOLD = int(environ.get('SLEEP_THRESHOLD', '60'))
-PING_INTERVAL = int(environ.get("PING_INTERVAL", "300"))  # 20 minutes
+PING_INTERVAL = int(environ.get("PING_INTERVAL", "300"))  # in seconds
 if 'DYNO' in environ:
     ON_HEROKU = True
 else:
@@ -23,12 +23,12 @@ else:
 URL = environ.get("URL", "")
 
 # Admins, Channels & Users
-LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002436768225'))
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '6108995220').split()]
+LOG_CHANNEL = int(environ.get('LOG_CHANNEL', ''))
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
 
 # MongoDB information
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://WXML:WXML@wxml.mov8ctk.mongodb.net/?appName=WXML")
-DATABASE_NAME = environ.get('DATABASE_NAME', "WXML")
+DATABASE_URI = environ.get('DATABASE_URI', "")
+DATABASE_NAME = environ.get('DATABASE_NAME', "")
 
 # Shortlink Info
 SHORTLINK = bool(environ.get('SHORTLINK', False)) # Set True Or False
