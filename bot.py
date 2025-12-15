@@ -1,90 +1,123 @@
-import sys, glob, importlib, logging, logging.config, pytz, asyncio
+import sys, glob, importlib, logging, logging.config, pytz, asyncio, os
 from pathlib import Path
+from datetime import date, datetime
 
-# Get logging configurations
+# ================= LOGGING =================
 logging.config.fileConfig('logging.conf')
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
-from pyrogram import Client, idle 
+# ================= IMPORTS =================
+from pyrogram import idle
+from aiohttp import web
+
 from database.users_chats_db import db
 from info import *
 from utils import temp
-from typing import Union, Optional, AsyncGenerator
-from Script import script 
-from datetime import date, datetime 
-from aiohttp import web
+from Script import script
 from plugins import web_server
 
 from lib.bot import File2Link
 from lib.util.keepalive import ping_server
 from lib.bot.clients import initialize_clients
 
+# ================= CONFIG =================
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
+
+RESTART_INTERVAL = 6 * 60 * 60  # 6 Hours
+
 File2Link.start()
 loop = asyncio.get_event_loop()
 
+# ================= BANNER =================
 def print_banner():
-    banner = f"""
-   
+    banner = """
     ███████╗██╗██╗░░░░░███████╗  ██████╗░  ██╗░░░░░██╗███╗░░██╗██╗░░██╗
     ██╔════╝██║██║░░░░░██╔════╝  ╚════██╗  ██║░░░░░██║████╗░██║██║░██╔╝
     █████╗░░██║██║░░░░░█████╗░░  ░░███╔═╝  ██║░░░░░██║██╔██╗██║█████═╝░
     ██╔══╝░░██║██║░░░░░██╔══╝░░  ██╔══╝░░  ██║░░░░░██║██║╚████║██╔═██╗░
     ██║░░░░░██║███████╗███████╗  ███████╗  ███████╗██║██║░╚███║██║░╚██╗
-    ╚═╝░░░░░╚═╝╚══════╝╚══════╝  ╚══════╝  ╚══════╝╚═╝╚═╝░░╚══╝╚═╝░░╚═╝                                                               ║
-
-"""
+    ╚═╝░░░░░╚═╝╚══════╝╚══════╝  ╚══════╝  ╚══════╝╚═╝╚═╝░░╚══╝╚═╝░░╚═╝
+    """
     print(banner)
 
+# ================= AUTO RESTART =================
+async def auto_restart():
+    await asyncio.sleep(RESTART_INTERVAL)
+    try:
+        tz = pytz.timezone("Asia/Kolkata")
+        now = datetime.now(tz).strftime("%d-%m-%Y | %I:%M:%S %p")
+        await File2Link.send_message(
+            chat_id=LOG_CHANNEL,
+            text=f"♻️ **Auto Restart Triggered**\n\n⏰ Time: `{now}`\n🕕 Interval: `6 Hours`"
+        )
+    except Exception as e:
+        logging.error(f"Restart message failed: {e}")
+
+    logging.info("Restarting bot after 6 hours")
+    os._exit(0)
+
+# ================= MAIN =================
 async def start():
-    print('\n')
-    print_banner()  # Fixed: Call the function instead of undefined variable
-    print('\n')
-    print('Initalizing Your Bot')
-    
+    print("\n")
+    print_banner()
+    print("\nInitializing Your Bot...\n")
+
     bot_info = await File2Link.get_me()
     await initialize_clients()
+
+    # Load Plugins
     for name in files:
         with open(name) as a:
             patt = Path(a.name)
             plugin_name = patt.stem.replace(".py", "")
             plugins_dir = Path(f"plugins/{plugin_name}.py")
-            import_path = "plugins.{}".format(plugin_name)
+            import_path = f"plugins.{plugin_name}"
+
             spec = importlib.util.spec_from_file_location(import_path, plugins_dir)
             load = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(load)
-            sys.modules["plugins." + plugin_name] = load
-            print("File 2 Link Imported => " + plugin_name)
+            sys.modules[import_path] = load
+
+            print(f"File2Link Imported => {plugin_name}")
+
     if ON_HEROKU:
         asyncio.create_task(ping_server())
+
+    # Save bot details
     me = await File2Link.get_me()
     temp.BOT = File2Link
     temp.ME = me.id
     temp.U_NAME = me.username
     temp.B_NAME = me.first_name
-    tz = pytz.timezone('Asia/Kolkata')
+
+    # Restart Message
+    tz = pytz.timezone("Asia/Kolkata")
     today = date.today()
-    now = datetime.now(tz)
-    time = now.strftime("%H:%M:%S %p")
-    await File2Link.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+    now = datetime.now(tz).strftime("%I:%M:%S %p")
+
+    await File2Link.send_message(
+        chat_id=LOG_CHANNEL,
+        text=script.RESTART_TXT.format(today, now)
+    )
+
+    # Web Server
     app = web.AppRunner(await web_server())
     await app.setup()
-    bind_address = "0.0.0.0"
-    await web.TCPSite(app, bind_address, PORT).start()
+    await web.TCPSite(app, "0.0.0.0", PORT).start()
+
+    # Start Auto Restart Task
+    asyncio.create_task(auto_restart())
+
     await idle()
 
-
-if __name__ == '__main__':
+# ================= RUN =================
+if __name__ == "__main__":
     try:
         loop.run_until_complete(start())
     except KeyboardInterrupt:
-        logging.info('Service Stopped Bye 👋')
+        logging.info("Service Stopped Bye 👋")
