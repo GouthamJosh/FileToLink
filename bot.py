@@ -59,7 +59,7 @@ async def auto_restart():
         logging.error(f"Restart message failed: {e}")
 
     logging.info("Restarting bot after 12 hours")
-    os._exit(0)
+    sys.exit(0)
 
 # ================= MAIN =================
 async def start():
@@ -121,6 +121,7 @@ if __name__ == "__main__":
         loop.run_until_complete(start())
     except KeyboardInterrupt:
         logging.info("Service Stopped Bye 👋")
+
 
 
 
