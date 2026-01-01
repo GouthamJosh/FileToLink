@@ -105,9 +105,9 @@ async def start():
         text=script.RESTART_TXT.format(today, now)
     )
 
-     app = web.AppRunner(await web_server())
-     await app.setup()
-     await web.TCPSite(app, "0.0.0.0", PORT).start()
+    app = web.AppRunner(await web_server())
+    await app.setup()
+    await web.TCPSite(app, "0.0.0.0", PORT).start()
 
     # Start Auto Restart Task
     asyncio.create_task(auto_restart())
@@ -120,4 +120,5 @@ if __name__ == "__main__":
         loop.run_until_complete(start())
     except KeyboardInterrupt:
         logging.info("Service Stopped Bye 👋")
+
 
