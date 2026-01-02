@@ -56,10 +56,7 @@ async def send_two_videos(client, message):
 
 @Client.on_message(filters.command("restart") & filters.private)
 async def restart_bot(client, message):
-
     if message.from_user.id not in ADMINS:
         return await message.reply_text("❌ You are not authorized.")
-
     await message.reply_text("♻️ <b>Bot restarted!</b>")
-
-    os.execv(sys.executable, ['python'] + sys.argv)
+    os.execv(sys.executable, ['python3', 'bot.py'])
