@@ -1,6 +1,8 @@
 import sys, glob, importlib, logging, logging.config, pytz, asyncio, os
 from pathlib import Path
 from datetime import date, datetime
+from plugins.selfping import self_ping_task # selfping from pligin
+from plugins.error_detection import detect_error,restart_bot #plugins error detecton
 
 # ================= LOGGING =================
 logging.config.fileConfig('logging.conf')
@@ -126,6 +128,7 @@ if __name__ == "__main__":
         loop.run_until_complete(start())
     except KeyboardInterrupt:
         logging.info("Service Stopped Bye 👋")
+
 
 
 
