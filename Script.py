@@ -1,12 +1,18 @@
 class script(object):
-    START_TXT = """<b>Hey {} 👋\n
-I’m <a href='https://t.me/{}'>{}</a>, your file link generator bot.\n
-I create instant <b>direct download</b> and <b>streaming links</b> for your files.\n\n
-<blockquote><b>How to use:</b>\n
-1️⃣ Send me any file
-2️⃣ I’ll generate a direct download & streaming link
-3️⃣ Share the link with anyone, anytime\n</blockquote>\n
-🚀 <b>Send a file to get started!</b>"""
+    START_TXT = """<b>Hey {} 👋</b>
+
+I'm <a href='https://t.me/{}'>{}</a> — your instant file link bot.
+
+✅ <b>Direct download</b> links
+✅ <b>Streaming</b> links  
+✅ Share anywhere, anytime
+
+<blockquote><b>How to use:</b>
+1. Send me any file
+2. Get instant links
+3. Share freely</blockquote>
+
+🚀 <b>Send a file to start!</b>"""
 
     LOG_TEXT_P = """#NewUser
 ID - <code>{}</code>
