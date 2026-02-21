@@ -1,118 +1,183 @@
 # FileToLink 🔗
 
-## ⚡ Transform Files into Shareable Direct Links
+<p align="center">
+  <b>Transform Any Telegram File into a Shareable Direct Download & Streaming Link</b><br/>
+  <a href="https://t.me/file2linkkuttu_bot">🤖 Try the Live Bot</a> •
+  <a href="#-getting-started">🚀 Deploy</a> •
+  <a href="#-configuration">⚙️ Config</a> •
+  <a href="#-usage">📖 Usage</a>
+</p>
 
-**FileToLink** is a powerful and efficient application/bot (likely a Telegram Bot written in Python) designed to instantly convert files uploaded to Telegram into **permanent, direct download and streaming links**. This project is ideal for users looking to quickly share media, documents, or any other file type, leveraging Telegram's robust file storage capabilities to generate rapid-access links.
-***
+<p align="center">
+  <a href="https://github.com/GouthamSER/FileToLink/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License"/>
+  </a>
+  <img src="https://img.shields.io/badge/Python-3.10%2B-yellow?logo=python" alt="Python"/>
+  <img src="https://img.shields.io/badge/Pyrogram-2.x-blue?logo=telegram" alt="Pyrogram"/>
+  <img src="https://img.shields.io/badge/MongoDB-Atlas-green?logo=mongodb" alt="MongoDB"/>
+</p>
 
-### Deploy in various Apps✔✨<br>
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=https://github.com/GouthamSER/FileToLink&branch=main)
+---
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/GouthamSER/FileToLink)
-***
-***
+## 📖 About
+
+**FileToLink** is a Python-based Telegram bot that instantly converts any file uploaded to Telegram into a **permanent HTTP/HTTPS direct download and streaming link**. It leverages Telegram's file storage infrastructure, making it effortless to share media, documents, and more — no cloud storage account required.
+
+> 🔴 **Live Demo:** [@file2linkkuttu_bot](https://t.me/file2linkkuttu_bot)
+
+---
 
 ## ✨ Features
 
-* **Direct Link Generation**: 🌐 Instantly convert uploaded files into a permanent HTTP/HTTPS **Direct Download Link**.
-* **Streaming Support**: 🎥 Media files (video, audio) can be streamed directly in a web browser or media player using the generated link.
-* **High-Speed Downloads**: 🚀 Leverage direct links for rapid file retrieval, bypassing Telegram client limitations.
-* **Support for Large Files**: 💾 Supports files up to Telegram's current limit (e.g., 2GB or 4GB).
-* **Cross-Platform Compatibility**: 📱💻 Supports traditional VPS deployment as well as mobile-based deployment via **Termux** (see installation below).
+- **⚡ Instant Link Generation** — Upload any file and receive a direct download link within seconds.
+- **🎥 Streaming Support** — Media files (video, audio) can be streamed directly in a browser or media player.
+- **🚀 High-Speed Downloads** — Direct links bypass Telegram client limitations for rapid retrieval.
+- **💾 Large File Support** — Handles files up to Telegram's maximum limit (up to 4 GB).
+- **🗃️ MongoDB Integration** — Persistent storage for user data and file indexing.
+- **👑 Admin Controls** — Broadcast messages, view stats, and manage files via admin commands.
+- **📦 Plugin System** — Modular plugin architecture makes it easy to extend functionality.
+- **🐳 Docker & Cloud Ready** — Deploy on Docker, Render, Koyeb, or any VPS with ease.
 
-***
+---
 
-## 📂 Project Structure Analysis
+## 📂 Project Structure
 
-Based on the nature of a File-to-Link bot, here is an analysis of the key files and folders and their likely purposes:
+```
+FileToLink/
+├── bot.py               # Main entry point — initializes and starts the bot
+├── info.py              # Configuration — API keys, tokens, and env variables
+├── utils.py             # Utility/helper functions shared across the project
+├── Script.py            # Additional scripting or startup logic
+├── database/            # MongoDB interaction — user management & file indexing
+├── plugins/             # Modular command handlers (stats, broadcast, etc.)
+├── lib/                 # Core library/helper modules
+├── requirements.txt     # Python dependencies
+├── Dockerfile           # Docker deployment configuration
+├── Procfile             # Process file for platforms like Heroku/Railway
+├── logging.conf         # Logging configuration
+└── .python-version      # Specifies the required Python version
+```
 
-| File/Folder | Purpose |
-| :--- | :--- |
-| `bot.py` | The main execution file containing the bot's core logic, message handlers, and the function for generating links. |
-| `info.py`| Stores configuration variables such as API keys, bot tokens, and database credentials. **Do not commit sensitive data to the repository.** ⚠️ |
-| `requirements.txt` | Lists all necessary Python libraries (e.g., `pyrogram`, `pymongo`, `aiohttp`) required to run the bot. |
-| `database/` | A directory containing scripts for database interaction, including setting up MongoDB, user management, and file indexing functions. |
-| `plugins/` | A directory for modular features and additional commands like `/stats`, `/broadcast`, or filters. |
-| `Procfile` / `Dockerfile` | Configuration files for deployment on platforms like Heroku, Railway, or Docker, specifying the command to start the bot. |
+---
 
-***
-
-## ⚙️ Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-To run this project, you will typically need:
+- **Python 3.10+** 🐍
+- **Telegram Account** 👤
+- **Telegram API credentials** from [my.telegram.org](https://my.telegram.org)
+- **A Bot Token** from [@BotFather](https://t.me/BotFather)
+- **MongoDB URI** (e.g., [MongoDB Atlas](https://www.mongodb.com/atlas) — free tier works fine)
+- A **private Telegram channel** where the bot is admin (used to store files)
 
-* A **Telegram Account** 👤
-* **Python 3.10+** installed or new version of python 🐍
-* A **MongoDB** database (for persistent storage and indexing) 🧭
+---
 
-### Installation
+### 🖥️ Local / VPS Deployment
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/GouthamSER/FileToLink
-    cd FileToLink
-    ```
-2.  **Install dependencies:**
-    ```bash
-    pip3 install -r requirements.txt
-    pip install -r requirements.txt --break-system-packages
-    ```
-3.  **Set up configuration** (see next section).
-4.  **Run the bot:**
-    ```bash
-    python3 bot.py
-    ```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/GouthamSER/FileToLink
+   cd FileToLink
+   ```
 
-***
+2. **Install dependencies:**
+   ```bash
+   pip3 install -r requirements.txt
+   ```
 
-## 🔑 Configuration (Environment Variables)
+3. **Configure environment variables** — fill in your values in `info.py` or set them as environment variables (see [Configuration](#-configuration) below).
 
-You must set the following environment variables. It is best practice to use a `info.py` file for local development or set them directly on your hosting platform.
+4. **Run the bot:**
+   ```bash
+   python3 bot.py
+   ```
 
-| Variable | Description | Source |
-| :--- | :--- | :--- |
-| `BOT_TOKEN` | Your Telegram Bot Token obtained from **@BotFather**. | **Required** |
-| `API_ID` | Your Telegram API ID from **my.telegram.org**. | **Required** |
-| `API_HASH` | Your Telegram API HASH from **my.telegram.org**. | **Required** |
-| `LOG_CHANNEL` | ID of the private Telegram channel where the files are permanently stored. The bot **must be an admin** here. | **Required** |
-| `DATABASE_URI` | MongoDB connection URI for indexing files and storing user data. | **Required** |
-| `ADMINS` | A space-separated list of User IDs for bot administrators. | *Optional* |
-| `LOG_CHANNEL` | ID of a channel for logging bot activity, errors, and status updates. | *Optional* |
+---
 
-***
+### 🐳 Docker Deployment
 
-## 🚀 Usage
+```bash
+docker build -t filetolink .
+docker run -d \
+  -e BOT_TOKEN="your_bot_token" \
+  -e API_ID="your_api_id" \
+  -e API_HASH="your_api_hash" \
+  -e DATABASE_URI="your_mongodb_uri" \
+  -e LOG_CHANNEL="-100xxxxxxxxxx" \
+  filetolink
+```
 
-Interact with the bot on Telegram to get started.
+---
+
+### ☁️ One-Click Cloud Deployment
+
+Deploy instantly to your preferred cloud platform:
+
+| Platform | Button |
+|----------|--------|
+| **Koyeb** | [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=https://github.com/GouthamSER/FileToLink&branch=main) |
+| **Render** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/GouthamSER/FileToLink) |
+
+---
+
+## ⚙️ Configuration
+
+Set the following variables in `info.py` or as environment variables on your hosting platform:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BOT_TOKEN` | ✅ | Your bot token from [@BotFather](https://t.me/BotFather) |
+| `API_ID` | ✅ | Telegram API ID from [my.telegram.org](https://my.telegram.org) |
+| `API_HASH` | ✅ | Telegram API Hash from [my.telegram.org](https://my.telegram.org) |
+| `LOG_CHANNEL` | ✅ | ID of the private channel where files are stored (bot must be admin) |
+| `DATABASE_URI` | ✅ | MongoDB connection string for user data and file indexing |
+| `ADMINS` | ⬜ | Space-separated list of Telegram User IDs with admin access |
+
+> ⚠️ **Security Warning:** Never commit `info.py` with real credentials to a public repository. Use environment variables or a `.env` file and add it to `.gitignore`.
+
+---
+
+## 📖 Usage
 
 ### User Commands
 
 | Command | Description |
-| :--- | :--- |
-| `/start` | Starts the bot and displays a welcome message. 👋 |
-| **(Upload File)** | Simply forward or upload any file/media to the bot to instantly receive the direct link. 📤 |
-
+|---------|-------------|
+| `/start` | Start the bot and receive a welcome message |
+| *(Upload any file)* | Send or forward any file to instantly receive a direct download link |
 
 ### Admin Commands
 
 | Command | Description |
-| :--- | :--- |
-| `/stats` | Get current bot statistics (e.g., total users, indexed file count). 📊 |
-| `/broadcast` | Send a message to all users of the bot. 📢 |
-| `/delete <reply>` | Delete a file from the database/index by replying to the file message in the bot's chat. 🗑️ |
+|---------|-------------|
+| `/stats` | View bot statistics (total users, files indexed, etc.) |
+| `/broadcast` | Broadcast a message to all bot users |
+| `/delete` | Reply to a file message to remove it from the index |
 
-***
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to open an issue or submit a pull request. 🛠️
+Contributions, issues, and feature requests are welcome!
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/my-feature`
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-This project is typically licensed under the **GPL-2.0** or **Apache-2.0** license. Please include a `LICENSE` file in your repository for the official license information.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+See the [LICENSE](LICENSE) file for details.
 
-You can learn more about building this type of application by watching this tutorial: [DEMO BOT](https://www.youtube.com/shorts/iT440kJfuNc). ▶️
+---
+
+## 👨‍💻 Author
+
+Made with ❤️ by [GouthamSER](https://github.com/GouthamSER)
+
+> ⭐ If you find this project useful, please consider giving it a star!
